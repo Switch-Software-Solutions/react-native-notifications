@@ -60,12 +60,8 @@ public class PushNotification implements IPushNotification {
 
     @Override
     public void onReceived() throws InvalidNotificationException {
-        if (!mAppLifecycleFacade.isAppVisible()) {
-            postNotification(null);
-            notifyReceivedBackgroundToJS();
-        } else {
-            notifyReceivedToJS();
-        }
+        postNotification(null);
+        notifyReceivedBackgroundToJS();
     }
 
     @Override
@@ -111,6 +107,8 @@ public class PushNotification implements IPushNotification {
     }
 
     protected PushNotificationProps createProps(Bundle bundle) {
+        String body = bundle.getString("alert");
+        bundle.putString("body",body);
         return new PushNotificationProps(bundle);
     }
 
