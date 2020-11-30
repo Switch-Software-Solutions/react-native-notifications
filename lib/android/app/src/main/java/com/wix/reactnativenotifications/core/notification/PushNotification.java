@@ -58,6 +58,20 @@ public class PushNotification implements IPushNotification {
         mNotificationProps = createProps(bundle);
     }
 
+    // @Override
+    // public void onReceived() throws InvalidNotificationException {
+    //     if (!mAppLifecycleFacade.isAppVisible()) {
+    //         postNotification(null);
+    //         notifyReceivedBackgroundToJS();
+    //     } else {
+    //         notifyReceivedToJS();
+    //     }
+    // }
+    // @Override
+    // public void onReceived() throws InvalidNotificationException {
+    //     postNotification(null);
+    //     notifyReceivedToJS();
+    // }
     @Override
     public void onReceived() throws InvalidNotificationException {
         postNotification(null);
@@ -108,7 +122,10 @@ public class PushNotification implements IPushNotification {
 
     protected PushNotificationProps createProps(Bundle bundle) {
         String body = bundle.getString("alert");
-        bundle.putString("body",body);
+        bundle.putString("body", body);
+        String image = bundle.getString("_mediaUrl");
+        bundle.putString("gcm.notification.image", image);
+        bundle.putString("image", image);
         return new PushNotificationProps(bundle);
     }
 
@@ -151,6 +168,7 @@ public class PushNotification implements IPushNotification {
                 .setContentText(mNotificationProps.getBody())
                 .setContentIntent(intent)
                 .setDefaults(Notification.DEFAULT_ALL)
+                .setStyle(new Notification.BigTextStyle().bigText(mNotificationProps.getBody()))
                 .setAutoCancel(true);
 
         setUpIcon(notification);
