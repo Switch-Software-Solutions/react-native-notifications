@@ -6,8 +6,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
@@ -18,6 +21,10 @@ import com.wix.reactnativenotifications.core.InitialNotificationHolder;
 import com.wix.reactnativenotifications.core.JsIOHelper;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
 import com.wix.reactnativenotifications.core.ProxyService;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_OPENED_EVENT_NAME;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
@@ -72,6 +79,7 @@ public class PushNotification implements IPushNotification {
     //     postNotification(null);
     //     notifyReceivedToJS();
     // }
+    
     @Override
     public void onReceived() throws InvalidNotificationException {
         postNotification(null);
@@ -169,7 +177,19 @@ public class PushNotification implements IPushNotification {
                 .setContentIntent(intent)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setStyle(new Notification.BigTextStyle().bigText(mNotificationProps.getBody()))
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .setWhen(System.currentTimeMillis())
+                .setShowWhen(true)
+                .setPriority(Notification.PRIORITY_MAX);
+
+        if(mNotificationProps.getImage() != null) {
+            Bitmap bitmap = getBitmapFromUrl(mNotificationProps.getImage());
+            notification.setStyle(
+                    new Notification.BigPictureStyle()
+                            .bigPicture(bitmap)
+                            .bigLargeIcon((Bitmap) null)
+            ).setLargeIcon(bitmap);
+        }
 
         setUpIcon(notification);
 
@@ -241,5 +261,20 @@ public class PushNotification implements IPushNotification {
 
     private int getAppResourceId(String resName, String resType) {
         return mContext.getResources().getIdentifier(resName, resType, mContext.getPackageName());
+    }
+
+    private Bitmap getBitmapFromUrl(String imageUrl) {
+        try {
+            URL url = new URL(imageUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            return BitmapFactory.decodeStream(input);
+
+        } catch (Exception e) {
+            Log.e("awesome", "Error in getting notification image: " + e.getLocalizedMessage());
+            return null;
+        }
     }
 }

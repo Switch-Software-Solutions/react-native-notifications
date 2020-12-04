@@ -18,6 +18,10 @@ public class PushNotificationProps {
         return getBundleStringFirstNotNull("gcm.notification.body", "body");
     }
 
+    public String getImage() {
+        return getBundleStringFirstNotNull("gcm.notification.image", "image");
+    }
+
     public Bundle asBundle() {
         return (Bundle) mBundle.clone();
     }
